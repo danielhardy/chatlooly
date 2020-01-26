@@ -1,0 +1,18 @@
+extends layout.pug
+
+block content
+    h2 Routes
+    table.table
+        thead
+            tr
+                th Path
+                th Method
+        each route in routes
+            if route.route 
+                tr
+                    td
+                        a(href=route.route.path)= route.route.path
+                    td
+                        ul.list-unstyled
+                            each method, index in route.route.methods
+                                li= index + ': ' + method

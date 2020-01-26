@@ -1,0 +1,137 @@
+extends layout.pug
+
+block scripts
+  script.
+    //get the secrete room name (passed in from backend);
+    var secrete_room = "#{secrete_room}";
+    
+    //Colors for usernames;
+    var user_colors = {};
+    
+    var HOST = location.origin.replace(/^http/, 'ws');
+    //open the connection    
+    var socket = io.connect(HOST);
+    
+    //Capture a username;
+    var this_user= prompt("What's your name?");
+    
+    // on connection to server, ask for user's name with an anonymous callback      
+    socket.on('connect', function(){
+      // call the server-side function 'adduser' and send one parameter (value of prompt)
+      socket.emit('adduser', this_user);
+    });
+    
+    // listener, whenever the server emits 'updatechat', this updates the chat body
+    socket.on('updatechat', function (username, data) {
+      console.log('Message receieved!');
+      var message_background = "";
+      
+      //Determine if user has a color if not make one;
+      if( !user_colors.hasOwnProperty(username) ){
+      
+        //This is client side only so it is not managed by a user;
+        user_colors[username] = "#"+Math.floor(Math.random()*16777215).toString(16)+"44";
+      }
+      
+      //Set the background for this user
+      message_background = user_colors[username];
+      
+      //Determine if this was from you or someone else
+      var message_class = "them";
+      if(this_user === username){
+        message_class = "you";
+      }
+      else if (username === "Chit Chatter[server]"){
+        message_class = "server";
+        message_background = "none";
+      }
+      
+      //Put the message on the page;
+      $('#messages').append('<li class="message '+message_class+'" style="background-color: '+message_background+';"><span class="message_username">'+username + ':</span><div class="message_content">' + data + '</div></li>');
+      
+      
+      //Scroll to bottom;
+      $('.message-container').stop().animate({scrollTop: $('.message-container')[0].scrollHeight}, 800);
+    });
+    
+    // listener, whenever the server emits 'updaterooms', this updates the room the client is in
+    socket.on('updaterooms', function(rooms, current_room) {
+      
+      //Check to see if we have a secrete room;
+      if(secrete_room !== ""){
+        //Looks like there is so add it to the list;
+        rooms.push(secrete_room);
+        
+        //remove room list and just set to secrete;
+        rooms = [];
+        current_room = secrete_room;
+      }
+      
+      $('#rooms').empty();
+      $.each(rooms, function(key, value) {
+        if(value == current_room){
+          $('#rooms').append('<div>' + value + '</div>');
+        }
+        else {
+          $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+        }
+      });
+    });
+    
+    function switchRoom(room){
+      socket.emit('switchRoom', room);
+    }
+    
+    // on load of page
+    $(function(){
+    
+      if(secrete_room !== ""){
+        switchRoom(secrete_room);
+      }
+      
+      // when the client clicks SEND
+      $('#message-send').click( function() {
+        //Get the messages;
+        var message = $('#new-message').val();
+        
+        //Clear the message;
+        $('#new-message').val('');
+        
+        //Place the focus back on the field;
+        $('#new-message').focus();
+        
+        // tell server to execute 'sendchat' and send along one parameter
+        socket.emit('sendchat', message);
+      });
+      
+    // when the client hits ENTER on their keyboard
+    $('#new-message').keypress(function(e) {
+      if(e.which == 13) {
+        $(this).blur();
+        $('#message-send').focus().click();
+      }
+      });
+    });
+    
+block content
+  .header
+    .nav
+      h1.logo
+        a(href="/")
+          svg(xmlns='http://www.w3.org/2000/svg', width='102', height='22.348', viewBox='0 0 102 22.348')
+            path#Path_10(data-name='Path 10', d='M12.188-10.055,9.844-7.7a3.171,3.171,0,0,0-.48-.885,3.228,3.228,0,0,0-.686-.662,2.97,2.97,0,0,0-.826-.41A3.018,3.018,0,0,0,6.938-9.8a2.9,2.9,0,0,0-1.236.27,3.029,3.029,0,0,0-1.008.756A3.624,3.624,0,0,0,4.02-7.617a4.243,4.243,0,0,0-.246,1.477A3.09,3.09,0,0,0,4.02-4.91,3.235,3.235,0,0,0,4.693-3.9a3.1,3.1,0,0,0,1.008.68,3.133,3.133,0,0,0,1.236.246,3.15,3.15,0,0,0,.9-.129,3.261,3.261,0,0,0,.814-.369,3.034,3.034,0,0,0,.68-.586,3.079,3.079,0,0,0,.486-.768l2.344,2.355a6.309,6.309,0,0,1-1.025,1.137A6.47,6.47,0,0,1,9.885-.48,6.266,6.266,0,0,1,8.467.053,6.426,6.426,0,0,1,6.938.234a6.273,6.273,0,0,1-2.49-.5A6.468,6.468,0,0,1,2.408-1.629,6.448,6.448,0,0,1,1.031-3.656a6.168,6.168,0,0,1-.5-2.484,7.16,7.16,0,0,1,.5-2.7,6.951,6.951,0,0,1,1.377-2.186,6.514,6.514,0,0,1,2.039-1.471,5.863,5.863,0,0,1,2.49-.539,6.021,6.021,0,0,1,1.541.2,6.222,6.222,0,0,1,1.441.58,6.219,6.219,0,0,1,1.266.932A5.8,5.8,0,0,1,12.188-10.055ZM16.945,0h-3.2V-17.543h3.2V-12a3.737,3.737,0,0,1,1.184-.615,4.326,4.326,0,0,1,1.242-.182,5.447,5.447,0,0,1,2.18.439,5.544,5.544,0,0,1,1.775,1.207,5.765,5.765,0,0,1,1.2,1.793,5.489,5.489,0,0,1,.439,2.186V0H21.738V-7.172h.023a2.349,2.349,0,0,0-.187-.932,2.413,2.413,0,0,0-.516-.768,2.431,2.431,0,0,0-.762-.516,2.307,2.307,0,0,0-.926-.187,2.421,2.421,0,0,0-.949.188,2.4,2.4,0,0,0-.773.516,2.413,2.413,0,0,0-.516.768,2.349,2.349,0,0,0-.187.932ZM39.387,0h-.773L37.371-1.723a10.293,10.293,0,0,1-.967.768,7.152,7.152,0,0,1-1.072.621,6.579,6.579,0,0,1-1.154.416,4.8,4.8,0,0,1-1.2.152,6.92,6.92,0,0,1-2.49-.445,5.916,5.916,0,0,1-2.039-1.295,6.068,6.068,0,0,1-1.377-2.08,7.337,7.337,0,0,1-.5-2.8,7,7,0,0,1,.5-2.689,6.4,6.4,0,0,1,1.377-2.1,6.216,6.216,0,0,1,2.039-1.365,6.4,6.4,0,0,1,2.49-.486,4.868,4.868,0,0,1,1.207.152,6.253,6.253,0,0,1,1.16.422,7.221,7.221,0,0,1,1.072.633,8.878,8.878,0,0,1,.955.785l1.242-1.488h.773ZM36.164-6.387a3.325,3.325,0,0,0-.252-1.271,3.654,3.654,0,0,0-.686-1.09,3.409,3.409,0,0,0-1.014-.762A2.75,2.75,0,0,0,32.977-9.8a3.42,3.42,0,0,0-1.236.223,2.815,2.815,0,0,0-1.008.656,3.08,3.08,0,0,0-.674,1.072,4.037,4.037,0,0,0-.246,1.459,4.037,4.037,0,0,0,.246,1.459,3.08,3.08,0,0,0,.674,1.072A2.815,2.815,0,0,0,31.74-3.2a3.42,3.42,0,0,0,1.236.223,2.75,2.75,0,0,0,1.236-.287,3.409,3.409,0,0,0,1.014-.762,3.654,3.654,0,0,0,.686-1.09A3.325,3.325,0,0,0,36.164-6.387ZM48.117,0a5.447,5.447,0,0,1-2.18-.439A5.683,5.683,0,0,1,44.15-1.646a5.683,5.683,0,0,1-1.207-1.787,5.447,5.447,0,0,1-.439-2.18V-9.34H40.945v-3.187H42.5v-5.016h3.188v5.016h4.852V-9.34H45.691v3.727a2.378,2.378,0,0,0,.188.943,2.413,2.413,0,0,0,.516.768,2.476,2.476,0,0,0,.773.521,2.357,2.357,0,0,0,.949.193h2.426V0Zm7.441,0H52.336V-17.543h3.223ZM70.125-6.387a6.758,6.758,0,0,1-.5,2.619,6.552,6.552,0,0,1-1.371,2.1A6.414,6.414,0,0,1,66.217-.275a6.177,6.177,0,0,1-2.5.51,6.148,6.148,0,0,1-2.49-.51A6.484,6.484,0,0,1,59.186-1.67a6.5,6.5,0,0,1-1.377-2.1,6.758,6.758,0,0,1-.5-2.619,6.863,6.863,0,0,1,.5-2.648,6.487,6.487,0,0,1,1.377-2.1,6.4,6.4,0,0,1,2.039-1.389,6.21,6.21,0,0,1,2.49-.5,6.572,6.572,0,0,1,2.5.475,6.045,6.045,0,0,1,2.033,1.348,6.385,6.385,0,0,1,1.371,2.1A7.1,7.1,0,0,1,70.125-6.387Zm-3.223,0a3.725,3.725,0,0,0-.252-1.4,3.326,3.326,0,0,0-.686-1.078,2.963,2.963,0,0,0-1.014-.691,3.2,3.2,0,0,0-1.236-.24,3.2,3.2,0,0,0-1.236.24,2.9,2.9,0,0,0-1.008.691A3.3,3.3,0,0,0,60.8-7.787a3.8,3.8,0,0,0-.246,1.4A3.626,3.626,0,0,0,60.8-5.039a3.383,3.383,0,0,0,.674,1.078,3.152,3.152,0,0,0,1.008.721,2.953,2.953,0,0,0,1.236.264,3.133,3.133,0,0,0,1.236-.246,3.077,3.077,0,0,0,1.014-.691,3.245,3.245,0,0,0,.686-1.078A3.738,3.738,0,0,0,66.9-6.387Zm17.121,0a6.758,6.758,0,0,1-.5,2.619,6.552,6.552,0,0,1-1.371,2.1A6.414,6.414,0,0,1,80.115-.275a6.177,6.177,0,0,1-2.5.51,6.148,6.148,0,0,1-2.49-.51A6.484,6.484,0,0,1,73.084-1.67a6.5,6.5,0,0,1-1.377-2.1,6.758,6.758,0,0,1-.5-2.619,6.863,6.863,0,0,1,.5-2.648,6.487,6.487,0,0,1,1.377-2.1,6.4,6.4,0,0,1,2.039-1.389,6.21,6.21,0,0,1,2.49-.5,6.572,6.572,0,0,1,2.5.475,6.045,6.045,0,0,1,2.033,1.348,6.385,6.385,0,0,1,1.371,2.1A7.1,7.1,0,0,1,84.023-6.387Zm-3.223,0a3.725,3.725,0,0,0-.252-1.4,3.326,3.326,0,0,0-.686-1.078,2.963,2.963,0,0,0-1.014-.691,3.2,3.2,0,0,0-1.236-.24,3.2,3.2,0,0,0-1.236.24,2.9,2.9,0,0,0-1.008.691A3.3,3.3,0,0,0,74.7-7.787a3.8,3.8,0,0,0-.246,1.4A3.626,3.626,0,0,0,74.7-5.039a3.383,3.383,0,0,0,.674,1.078,3.152,3.152,0,0,0,1.008.721,2.953,2.953,0,0,0,1.236.264,3.133,3.133,0,0,0,1.236-.246,3.077,3.077,0,0,0,1.014-.691,3.245,3.245,0,0,0,.686-1.078A3.738,3.738,0,0,0,80.8-6.387ZM89.016,0H85.793V-17.543h3.223Zm5.461,4.781V1.559l1.781.023a2.7,2.7,0,0,0,.9-.152,3.092,3.092,0,0,0,.8-.422,3.148,3.148,0,0,0,.65-.639,3.469,3.469,0,0,0,.457-.8Q98.543-.211,98,.012a2.876,2.876,0,0,1-1.1.223,5.785,5.785,0,0,1-2.18-.41,5.383,5.383,0,0,1-1.787-1.166,5.383,5.383,0,0,1-1.207-1.84,6.421,6.421,0,0,1-.439-2.432v-6.937h3.188v6.938a3.213,3.213,0,0,0,.193,1.166,2.417,2.417,0,0,0,.521.832,2.086,2.086,0,0,0,.768.5,2.675,2.675,0,0,0,.943.164,1.991,1.991,0,0,0,.932-.229,2.614,2.614,0,0,0,.768-.6,2.894,2.894,0,0,0,.516-.85,2.641,2.641,0,0,0,.188-.979v-6.937h3.223V-1.582A6.311,6.311,0,0,1,102.012.9a6.448,6.448,0,0,1-1.377,2.027A6.57,6.57,0,0,1,98.6,4.3a6.168,6.168,0,0,1-2.484.5Z', transform='translate(-0.527 17.543)', fill='#0a4a4a')
+
+      #rooms
+  
+  //-Messages box  
+  .message-container
+    ul#messages
+      li.message.server(style="background-color: none;")
+        span.message_username chatlooly [server]
+        .message_content By using this service, you agree to our <a href="/privacy">privacy policy</a> and <a href="/tos">terms of service</a>.
+      
+      //-Messages go hereh
+  .message-creator
+    #message-creator.message-box
+      input#new-message.new-message(type="text", autocomplete="off")
+      button#message-send.btn.btn-primary Send

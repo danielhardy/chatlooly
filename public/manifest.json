@@ -1,0 +1,22 @@
+{
+  "name": "Chatlooly",
+  "short_name": "Chatlooly",
+  "icons": [
+    {
+      "src": "/img/icons/android/xxxhdpi.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/img/icons/android/googleplayicon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "background_color": "#008080",
+  "orientation": "portrait",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#008080"
+}
