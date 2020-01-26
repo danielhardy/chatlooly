@@ -7,7 +7,7 @@ socket.on("connect", function() {
 
 // listener, whenever the server emits 'updatechat', this updates the chat body
 socket.on("updatechat", function(username, data) {
-  console.log("Message receieved!");
+  //console.log("Message receieved!");
 
   //Determine if user has a color if not make one;
   if (!user_colors.hasOwnProperty(username)) {

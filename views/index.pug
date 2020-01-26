@@ -1,5 +1,13 @@
 extends layout.pug
 block scripts
+    //script(type="text/javascript" src="/js/roomredirect.js")
+    script.
+        function redirct2room() {
+            var room = document.getElementById("room").value;
+
+            //Redirect window using javascript
+            window.location.href = "/r/" + room;
+            }
     
 block content
     .container
@@ -10,3 +18,8 @@ block content
                     | and has no long term memory. Like real life, when you leave a room everything 
                     | that was said is left only in the memory of those who were there.
                 
+                br
+                form(method="POST")
+                h4 Room Name
+                input(type="text" placeholder="Room" name="room" id="room")
+                button(onclick="redirct2room()" ) Go
