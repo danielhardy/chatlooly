@@ -25,6 +25,12 @@ socket.on("updatechat", function(username, data) {
       data +
       "</li>"
   );
+  notifyMe({
+    username: username,
+    message: data,
+    title: "New Message",
+    room: rooms[0]
+  });
 });
 
 // listener, whenever the server emits 'updaterooms', this updates the room the client is in
@@ -81,3 +87,28 @@ $(function() {
     }
   });
 });
+
+// Add notifications
+// request permission on page load
+document.addEventListener("DOMContentLoaded", function() {
+  console.log("DOM Loaded Event Fired!");
+  if (!Notification) {
+    alert("Desktop notifications not available in your browser. Try Chromium.");
+    return;
+  }
+
+  if (Notification.permission !== "granted") Notification.requestPermission();
+});
+
+function notifyMe(message) {
+  if (Notification.permission !== "granted") Notification.requestPermission();
+  else {
+    var notification = new Notification("Notification title", {
+      icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
+      body: message.data
+    });
+    notification.onclick = function() {
+      window.open("chat.ellooley.com/r/" + message.room);
+    };
+  }
+}

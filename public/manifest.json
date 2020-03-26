@@ -1,6 +1,7 @@
 {
   "name": "Chatlooly",
   "short_name": "Chatlooly",
+  "start_url": ".",
   "icons": [
     {
       "src": "/img/icons/android/xxxhdpi.png",

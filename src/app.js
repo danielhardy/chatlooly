@@ -5,10 +5,10 @@ var express = require("express"),
   sassMiddleware = require("node-sass-middleware"),
   path = require("path"),
   io = require("socket.io").listen(server),
-  Logger = require("le_node");
+  logger = require("le_node");
 
 // setup Log Entries
-var log = new Logger({
+var log = new logger({
   token: "5c4fe351-5c5d-4ee5-83bb-1767800c952b"
 });
 
@@ -23,11 +23,13 @@ server.listen(port);
 app.set("view engine", "pug");
 app.use(express.static("public"));
 
+console.log("Path.join: " + path.join(__dirname));
+
 // setup a middleware for compiling SCSS;
 app.use(
   sassMiddleware({
-    src: path.join(__dirname, "src"),
-    dest: path.join(__dirname, "public"),
+    src: path.join(__dirname, "sass"),
+    dest: path.join(__dirname, "css"),
     debug: true,
     force: true,
     outputStyle: "compress"

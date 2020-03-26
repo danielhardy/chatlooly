@@ -45,6 +45,17 @@ block scripts
         message_class = "server";
         message_background = "none";
       }
+      if(message_class === "them"){
+        //If it this isn't a server response send a notification
+        //console.log("Room " + room + ", Rooms "+rooms[0]);
+        notifyMe({
+          username: username,
+          message: data,
+          title: "New Message from "+username ,
+          icon: "//img/icons/android/hdpi.png",
+          room: "test" //TODO CHANGE THIS!
+        });
+      }
       
       //Put the message on the page;
       $('#messages').append('<li class="message '+message_class+'" style="background-color: '+message_background+';"><span class="message_username">'+username + ':</span><div class="message_content">' + data + '</div></li>');
@@ -52,6 +63,7 @@ block scripts
       
       //Scroll to bottom;
       $('.message-container').stop().animate({scrollTop: $('.message-container')[0].scrollHeight}, 800);
+
     });
     
     // listener, whenever the server emits 'updaterooms', this updates the room the client is in
@@ -112,6 +124,32 @@ block scripts
       }
       });
     });
+
+    //Notifications
+    document.addEventListener("DOMContentLoaded", function() {
+      console.log("DOM Loaded Event Fired!");
+      if (!Notification) {
+        alert("Desktop notifications not available in your browser. Try Chromium.");
+        return;
+      }
+
+      if (Notification.permission !== "granted") Notification.requestPermission();
+    });
+
+    function notifyMe(message) {
+      if (Notification.permission !== "granted") Notification.requestPermission();
+      else {
+        var notification = new Notification(message.title, {
+          body: message.data,
+          icon: message.icon,
+          data: message.room
+        });
+        notification.onclick = function(e, message) {
+          console.log(message);
+          window.open("http://chat.elooly.com/r/" + this.data);
+        };
+      }
+    }
     
 block content
   .header
