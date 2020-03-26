@@ -15,7 +15,7 @@ socket.on("updatechat", function(username, data) {
     user_colors[username] =
       "#" + Math.floor(Math.random() * 16777215).toString(16);
   }
-
+  //Create the message
   $("#messages").append(
     '<li><b style="color: ' +
       user_colors[username] +
@@ -25,6 +25,11 @@ socket.on("updatechat", function(username, data) {
       data +
       "</li>"
   );
+
+  //Send notifications
+  console.log("The room you are in is " + rooms[0]);
+
+  //Notify
   notifyMe({
     username: username,
     message: data,
@@ -108,7 +113,7 @@ function notifyMe(message) {
       body: message.data
     });
     notification.onclick = function() {
-      window.open("chat.ellooley.com/r/" + message.room);
+      window.open("http://chat.ellooley.com/r/" + message.room);
     };
   }
 }

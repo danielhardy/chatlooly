@@ -22,8 +22,8 @@ block scripts
     });
     
     // listener, whenever the server emits 'updatechat', this updates the chat body
-    socket.on('updatechat', function (username, data) {
-      console.log('Message receieved!');
+    socket.on('updatechat', function (username, data, room) {
+      console.log('Message receieved in room: '+room);
       var message_background = "";
       
       //Determine if user has a color if not make one;
@@ -47,13 +47,12 @@ block scripts
       }
       if(message_class === "them"){
         //If it this isn't a server response send a notification
-        //console.log("Room " + room + ", Rooms "+rooms[0]);
         notifyMe({
           username: username,
           message: data,
           title: "New Message from "+username ,
-          icon: "//img/icons/android/hdpi.png",
-          room: "test" //TODO CHANGE THIS!
+          icon: "/img/icons/android/hdpi.png",
+          room: room //TODO CHANGE THIS!
         });
       }
       
@@ -144,10 +143,8 @@ block scripts
           icon: message.icon,
           data: message.room
         });
-        notification.onclick = function(e, message) {
-          console.log(message);
-          window.open("http://chat.elooly.com/r/" + this.data);
-        };
+        notification.onclick = function(x) { window.focus(); this.close(); };
+        //notification.show();
       }
     }
     
