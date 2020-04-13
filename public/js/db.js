@@ -26,6 +26,7 @@ function getUser(callback, error) {
 //Create a user
 function createUser(name, callback) {
   //console.log("Attempting to create a new user: " + name);
+  this_user = name;
   db.put({
     _id: "user",
     name: name
