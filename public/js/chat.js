@@ -1,41 +1,72 @@
 //get the secrete room name (passed in from backend);
+var secrete_room = "#{secrete_room}";
+
+//Colors for usernames;
+var user_colors = {};
+var HOST = location.origin.replace(/^http/, "ws");
+
+//open the connection
+var socket = io.connect(HOST);
+
+//Capture a username;
+//var this_user = prompt("What's your name?");
+
 // on connection to server, ask for user's name with an anonymous callback
 socket.on("connect", function() {
   // call the server-side function 'adduser' and send one parameter (value of prompt)
-  socket.emit("adduser", prompt("What's your name?"));
+  socket.emit("adduser", this_user);
 });
 
 // listener, whenever the server emits 'updatechat', this updates the chat body
-socket.on("updatechat", function(username, data) {
-  //console.log("Message receieved!");
+socket.on("updatechat", function(username, data, room) {
+  var message_background = "";
 
   //Determine if user has a color if not make one;
   if (!user_colors.hasOwnProperty(username)) {
     //This is client side only so it is not managed by a user;
     user_colors[username] =
-      "#" + Math.floor(Math.random() * 16777215).toString(16);
+      "#" + Math.floor(Math.random() * 16777215).toString(16) + "44";
   }
-  //Create the message
+
+  //Set the background for this user
+  message_background = user_colors[username];
+
+  //Determine if this was from you or someone else
+  var message_class = "them";
+  if (this_user === username) {
+    message_class = "you";
+  } else if (username === "Chit Chatter[server]") {
+    message_class = "server";
+    message_background = "none";
+  }
+  if (message_class === "them") {
+    //If it this isn't a server response send a notification
+    notifyMe({
+      username: username,
+      message: data,
+      title: "New Message from " + username,
+      icon: "/img/icons/android/hdpi.png",
+      room: room
+    });
+  }
+
+  //Put the message on the page;
   $("#messages").append(
-    '<li><b style="color: ' +
-      user_colors[username] +
-      '">' +
+    '<li class="message ' +
+      message_class +
+      '" style="background-color: ' +
+      message_background +
+      ';"><span class="message_username">' +
       username +
-      ":</b> " +
+      ':</span><div class="message_content">' +
       data +
-      "</li>"
+      "</div></li>"
   );
 
-  //Send notifications
-  console.log("The room you are in is " + rooms[0]);
-
-  //Notify
-  notifyMe({
-    username: username,
-    message: data,
-    title: "New Message",
-    room: rooms[0]
-  });
+  //Scroll to bottom;
+  $(".message-container")
+    .stop()
+    .animate({ scrollTop: $(".message-container")[0].scrollHeight }, 800);
 });
 
 // listener, whenever the server emits 'updaterooms', this updates the room the client is in
@@ -72,12 +103,21 @@ function switchRoom(room) {
 
 // on load of page
 $(function() {
+  if (secrete_room !== "") {
+    switchRoom(secrete_room);
+  }
+
   // when the client clicks SEND
   $("#message-send").click(function() {
+    //Get the messages;
     var message = $("#new-message").val();
-    console.log("sent new message");
 
+    //Clear the message;
     $("#new-message").val("");
+
+    //Place the focus back on the field;
+    $("#new-message").focus();
+
     // tell server to execute 'sendchat' and send along one parameter
     socket.emit("sendchat", message);
   });
@@ -92,28 +132,3 @@ $(function() {
     }
   });
 });
-
-// Add notifications
-// request permission on page load
-document.addEventListener("DOMContentLoaded", function() {
-  console.log("DOM Loaded Event Fired!");
-  if (!Notification) {
-    alert("Desktop notifications not available in your browser. Try Chromium.");
-    return;
-  }
-
-  if (Notification.permission !== "granted") Notification.requestPermission();
-});
-
-function notifyMe(message) {
-  if (Notification.permission !== "granted") Notification.requestPermission();
-  else {
-    var notification = new Notification("Notification title", {
-      icon: "http://cdn.sstatic.net/stackexchange/img/logos/so/so-icon.png",
-      body: message.data
-    });
-    notification.onclick = function() {
-      window.open("http://chat.ellooley.com/r/" + message.room);
-    };
-  }
-}

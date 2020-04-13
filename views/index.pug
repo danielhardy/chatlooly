@@ -1,13 +1,22 @@
 extends layout.pug
 block scripts
-    //script(type="text/javascript" src="/js/roomredirect.js")
+    script(src="//cdn.jsdelivr.net/npm/pouchdb@7.1.1/dist/pouchdb.min.js")
+    script(src="/js/db.js")
     script.
+        document.addEventListener("DOMContentLoaded", function() {
+            // Get the user context
+            getUser(function(doc){
+                getRooms(function(){
+                    //We have a user so see if they have rooms
+                });
+            });            
+        });
         function redirct2room() {
             var room = document.getElementById("room").value;
 
             //Redirect window using javascript
             window.location.href = "/r/" + room;
-            }
+        }
     
 block content
     .container
@@ -19,6 +28,8 @@ block content
                     | that was said is left only in the memory of those who were there.
                 
                 br
+                p Username:
+                    span.username
                 form(method="POST")
                 h4 Room Name
                 input(type="text" placeholder="Room" name="room" id="room")

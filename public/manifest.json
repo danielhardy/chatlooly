@@ -1,7 +1,7 @@
 {
   "name": "Chatlooly",
   "short_name": "Chatlooly",
-  "start_url": ".",
+  "start_url": "http://chat.elooly.com",
   "icons": [
     {
       "src": "/img/icons/android/xxxhdpi.png",
