@@ -1,5 +1,7 @@
 //get the secrete room name (passed in from backend);
-var secrete_room = "#{secrete_room}";
+var secrete_room = window.location.href.substring(
+  window.location.href.lastIndexOf("/") + 1
+);
 
 //Colors for usernames;
 var user_colors = {};
