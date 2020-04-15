@@ -26,23 +26,28 @@ function getUser(callback, error) {
 //Create a user
 function createUser(name, callback) {
   //console.log("Attempting to create a new user: " + name);
-  this_user = name;
-  db.put({
-    _id: "user",
-    name: name
-  })
-    .then(function(response) {
-      // Read the full doc as the response doesn't contain the name
-      db.get("user").then(function(doc) {
-        //console.log("Just finished creating user: " + JSON.stringify(doc));
-        spreadUser(doc);
-      });
+  if (name.replace(/\s+/g, "") === "" || name === undefined || name === null) {
+    alert("You must enter a username");
+    getUser();
+  } else {
+    this_user = name;
+    db.put({
+      _id: "user",
+      name: name
     })
-    .catch(function(err) {
-      //failed to create user;
-      //callback(err);
-      console.log(`Error: ${JSON.stringify(err)}`);
-    });
+      .then(function(response) {
+        // Read the full doc as the response doesn't contain the name
+        db.get("user").then(function(doc) {
+          //console.log("Just finished creating user: " + JSON.stringify(doc));
+          spreadUser(doc);
+        });
+      })
+      .catch(function(err) {
+        //failed to create user;
+        //callback(err);
+        console.log(`Error: ${JSON.stringify(err)}`);
+      });
+  }
 }
 //Propagate the user name to the UI by making all classes `username` innhtml the new username
 function spreadUser(doc) {

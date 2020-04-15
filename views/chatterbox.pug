@@ -23,6 +23,7 @@ block scripts
     });
 
     function notifyMe(message) {
+      var Noise = document.getElementById("ChatNoise");
       if (Notification.permission !== "granted") Notification.requestPermission();
       else {
         var notification = new Notification(message.title, {
@@ -31,6 +32,7 @@ block scripts
           data: message.room
         });
         notification.onclick = function(x) { window.focus(); this.close(); };
+      Noise.play();
       }
     }
     
@@ -56,3 +58,7 @@ block content
     #message-creator.message-box
       input#new-message.new-message(type="text", autocomplete="off")
       button#message-send.btn.btn-primary Send
+
+  .audio-container
+    audio#ChatNoise
+      source(src="/sounds/Scare_Flutter.mp3", type="audio/mpeg")
