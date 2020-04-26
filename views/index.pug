@@ -9,28 +9,55 @@ block scripts
                 getRooms(function(){
                     //We have a user so see if they have rooms
                 });
-            });            
+            });         
         });
+
+        // Edit useranme;
+        function editclick() {
+            document.getElementById("edit_username").disabled = false;
+            document.getElementById("save_username_link").classList.remove("hidden");
+            document.getElementById("edit_username_link").classList.add("hidden");
+        }
+        function saveclick(){
+            var username = document.getElementById("edit_username");
+                username.disabled = true;
+            document.getElementById("edit_username_link").classList.remove("hidden");
+            document.getElementById("save_username_link").classList.add("hidden");
+
+            //TODO Add code to save change;
+            updateUser(username.value);
+        }
+
+        //Manage Room
         function redirct2room() {
             var room = document.getElementById("room").value;
-
             //Redirect window using javascript
             window.location.href = "/r/" + room;
+
+            //Stops the form from submiting
+            return false
         }
     
 block content
     .container
         .row.justify-content-sm-center
             .col-12.col-md-8.col-lg-6(style="margin-top:50px;")
-                h1 Welcome to Chatlooly
+                img(src="/img/chatlooly_logo.svg", width="200px")
+                h2.title Welcome
                 p Chatlooly is a very simple chat application that is 100% anonymous 
                     | and has no long term memory. Like real life, when you leave a room everything 
                     | that was said is left only in the memory of those who were there.
-                
-                br
-                p Username:
-                    span.username
-                form(method="POST")
-                h4 Room Name
-                input(type="text" placeholder="Room" name="room" id="room")
-                button(onclick="redirct2room()" ) Go
+
+
+                .userInfo.clear
+                    h2.title Username:
+                    div.text-black
+                        input#edit_username.input(disabled="true")
+                        span#edit_username_link.link(onclick="editclick()") edit
+                        span#save_username_link.btn.btn-primary.hidden(onclick="saveclick()") Save
+                .rooms.clear 
+                    h4.title Room Name
+                    ul#rooms
+                    form(method="POST")
+                    input.input(type="text" placeholder="Room name" name="room" id="room")
+                    button.btn.btn-secondary(onclick="redirct2room(); return false;" ) Go

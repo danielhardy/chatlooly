@@ -1,6 +1,7 @@
 extends layout.pug
 
 block scripts
+  meta(name="theme-color" content="#fff")
   script(src="//cdn.jsdelivr.net/npm/pouchdb@7.1.1/dist/pouchdb.min.js")
   script(src="/js/db.js")
   script(src="/js/chat.js")
@@ -32,7 +33,7 @@ block scripts
           data: message.room
         });
         notification.onclick = function(x) { window.focus(); this.close(); };
-      Noise.play();
+      //Noise.play();
       }
     }
     

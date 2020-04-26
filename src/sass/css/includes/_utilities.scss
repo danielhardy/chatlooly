@@ -1,0 +1,19 @@
+/*
+ * Utility Classes
+ */
+ 
+.hidden{
+  display:none;
+}
+.show{
+  display:inherit;
+}
+.link{
+  color: $primary;
+  //text-decoration: underline;
+  cursor: pointer;
+}
+
+.clear{
+  clear: both;
+}

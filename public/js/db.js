@@ -8,14 +8,12 @@ var this_user = "";
 function getUser(callback, error) {
   db.get("user")
     .then(function(doc) {
-      //Should have a user here;
-      //console.log(`User found: ${JSON.stringify(doc)}`);
-
       //Update the global so we can access later;
       fullUser = doc;
       //Call the call back;
       callback(doc);
       spreadUser(doc);
+      spreadUserInputs(doc);
     })
     .catch(function(err) {
       //Should not have a user data so make some;
@@ -40,6 +38,7 @@ function createUser(name, callback) {
         db.get("user").then(function(doc) {
           //console.log("Just finished creating user: " + JSON.stringify(doc));
           spreadUser(doc);
+          spreadUserInputs(doc);
         });
       })
       .catch(function(err) {
@@ -49,6 +48,26 @@ function createUser(name, callback) {
       });
   }
 }
+
+// Update the user;
+function updateUser(name, callback) {
+  db.get("user")
+    .then(function(doc) {
+      return db.put({
+        _id: "user",
+        _rev: doc._rev,
+        name: name
+      });
+    })
+    .then(function(response) {
+      // handle response
+      console.log("SAVED");
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+}
+
 //Propagate the user name to the UI by making all classes `username` innhtml the new username
 function spreadUser(doc) {
   console.log("Spread was called with " + JSON.stringify(doc));
@@ -56,6 +75,13 @@ function spreadUser(doc) {
   var el = document.getElementsByClassName("username");
   for (i = 0; i < el.length; i++) {
     el[i].innerHTML = doc.name;
+  }
+}
+function spreadUserInputs(doc) {
+  this_user = doc.name;
+  var edit_username = document.getElementById("edit_username");
+  if (edit_username !== null) {
+    edit_username.value = doc.name;
   }
 }
 
