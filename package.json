@@ -21,7 +21,7 @@
     "nodemon": "2.0.2",
     "pug": "^2.0.4",
     "session": "^0.1.0",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.4.0"
   },
   "keywords": []
 }
